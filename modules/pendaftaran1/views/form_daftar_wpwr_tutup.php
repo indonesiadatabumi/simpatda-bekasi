@@ -1,0 +1,101 @@
+<div id="toolbar-box">
+	<div class="t">
+		<div class="t"><div class="t"></div></div>
+	</div>
+
+	<div class="m">
+		<div class="header icon-48-print">
+			Cetak Daftar WP/WR Tutup
+		</div>
+		<div class="clr"></div>
+	</div>
+	<div class="b">
+		<div class="b">
+			<div class="b"></div>
+		</div>
+	</div>
+</div>
+
+<div class="clr"></div>
+				
+<div id="element-box">
+	<div class="t">
+		<div class="t"><div class="t"></div></div>
+	</div>
+	<div class="m">
+		<!-- content body -->
+		<form name="adminForm" id="adminForm">
+		<table class="admintable">
+			<tr>
+				<td class="key">Tgl. Tutup</td>
+				<td>
+					<input type="text" id="fDate" name="fDate" size="10" />
+					s / d
+					<input type="text" id="tDate" name="tDate" size="10" />
+				</td>
+			</tr>
+			<tr>
+				<td class="key" id="namabidus">Jenis Pajak</td>
+				<td id="pilihbidus">
+					<?php
+						$attributes = 'id="bidus" class="inputbox"';
+						echo form_dropdown('bidus', $bidang_usaha, '', $attributes);
+					?>
+				</td>
+			</tr>
+			<tr>
+				<td class="key">Kecamatan</td>
+				<td>
+					<?php
+						$attributes = 'id="wp_wr_kd_camat" class="inputbox mandatory"';
+						echo form_dropdown('wp_wr_kd_camat', $kecamatan, '', $attributes);
+					?>
+				</td>
+			</tr>
+			<tr>
+				<td class="key">Mengetahui</td>
+				<td>
+					<?php
+						$attributes = 'id="ddl_mengetahui" class="inputbox"';
+						echo form_dropdown('ddl_mengetahui', $pejabat_daerah, '', $attributes);
+					?>
+				</td>
+			</tr>
+			<tr>
+				<td class="key">Diperiksa oleh</td>
+				<td>
+					<?php
+						$attributes = 'id="ddl_pemeriksa" class="inputbox"';
+						echo form_dropdown('ddl_pemeriksa', $pejabat_daerah, '', $attributes);
+					?>
+				</td>
+			</tr>
+			<tr>
+				<td class="key" valign="top">Tgl. Cetak</td>
+				<td>
+					<input type="text" name="tgl_cetak" id="tgl_cetak" tabindex="4" size="10" value="<?= date('d-m-Y'); ?>"/>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+					<input type="button" name="btn_cetak" id="btn_cetak" value="  Cetak  " class="button" />
+				</td>
+			</tr>
+		</table>
+		</form>
+		<div class="clr"></div>
+	</div>
+	
+	<div class="b">
+		<div class="b">
+			<div class="b"></div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	var GLOBAL_WP_TUTUP_VARS = new Array ();
+	GLOBAL_WP_TUTUP_VARS["cetak"] = "<?=base_url();?>pendaftaran/dokumentasi_pengolahan/export_wp_tutup";
+</script>
+<script type="text/javascript" src="modules/pendaftaran/scripts/form_daftar_wpwr_tutup.js"></script>

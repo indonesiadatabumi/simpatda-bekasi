@@ -1,0 +1,161 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+/**
+ * Pajak_genset controller
+ * @package Simpatda
+ * @author Daniel Hutauruk
+ * @version 20121016
+ */
+class Pajak_pln extends Master_Controller {
+	/**
+	 * contructor
+	 */
+	function __construct() {
+		parent::__construct();
+		$this->load->model('pajak_pln_model');
+		$this->load->model('common_model');
+		$this->load->model('spt_model');
+	}
+	
+	/**
+	 * add page controller
+	 */
+	function add() {
+		$data['sistem_pemungutan'] = array('1' => 'Self Assesment', '2' => 'Official Assesment');
+		$data['tarif'] = array('1.5' => '1.5', '5' => '5', '7' => '7');
+		$this->load->view('add_pajak_pln', $data);
+	}
+	
+	/**
+	 * insert data sptpd penrangan jalan
+	 */
+	function save() {
+		$result = array();
+		$wp_id = $this->input->post('wp_wr_id');
+		
+		if (!empty($wp_id)) {
+			$check_masa_pajak = $this->spt_model->check_masa_pajak(
+															$wp_id, 
+															$this->input->post('spt_periode_jual1'),
+															$this->input->post('spt_periode_jual2'),
+															$this->input->post('korek'),
+															$this->input->post('spt_jenis_pemungutan')
+															);
+			if (!$check_masa_pajak) {
+				//save spt and spt_detail
+				$spt_id = $this->spt_model->insert_spt();
+				
+				if ($spt_id != 0) {
+					$this->spt_model->insert_spt_detail($spt_id);
+					$result = array('status' => true, 'msg' => 'Data berhasil disimpan');
+					
+					//insert history log
+					$this->common_model->history_log("pendataan", "i", "Insert SPT Pajak PLN : ".
+							$spt_id." | ".$_POST['spt_periode']." | ".$_POST['spt_kode'].$_POST['spt_no_register']." | ".$_POST['wp_wr_nama']." | ".$_POST['spt_pajak']);
+				} else {
+					$result = array('status' => false, 'msg' => 'Data tidak berhasil disimpan.');
+				}
+			} else {
+				$result = array('status' => false, 'msg' => 'WPWR untuk periode penjualan yang sama sudah pernah diinput');
+			}
+		} else {
+			$result = array('status' => false, 'msg' => 'Silahkan masukkan data WP terlebih dahulu');
+		}
+		
+		echo json_encode($result);
+	}
+	
+	/**
+	 * view data
+	 */
+	function view() {
+		$this->load->view('view_pajak_pln');	
+	}
+	
+	/**
+	 * get list sptpd hotel
+	 */
+	function get_list() {
+		$this->pajak_pln_model->get_list();
+	}
+	
+	/**
+	 * edit pajak controller
+	 */
+	function edit() {
+		$sptpd = $this->spt_model->get_sptpd();
+		$data['sistem_pemungutan'] = array('1' => 'Self Assesment', '2' => 'Official Assesment');
+		$data['tarif'] = array('1.5' => '1.5', '5' => '5', '7' => '7');
+		
+		if ($sptpd != false) {
+			//get spt_detail
+			$spt_detail = $this->pajak_pln_model->get_spt_detail();
+			$data['row'] = $sptpd;
+			$data['row_detail'] = $spt_detail;
+			$this->load->view('edit_pajak_pln', $data);	
+		}
+	}
+	
+	/**
+	 * update data sptpd
+	 */
+	function update() {
+		$result = array();
+		$wp_id = $this->input->post('wp_wr_id');
+		$spt_id = $this->input->post('spt_id');
+		
+		if (!empty($wp_id) && !empty($spt_id)) {
+			//update spt and spt_detail
+			$check_masa_pajak = $this->spt_model->check_masa_pajak(
+															$wp_id, 
+															$this->input->post('spt_periode_jual1'),
+															$this->input->post('spt_periode_jual2'),
+															$this->input->post('korek'),
+															$this->input->post('spt_jenis_pemungutan'),
+															$this->input->post('spt_id')
+															);
+			if (!$check_masa_pajak) {
+				$return = $this->spt_model->update_spt();
+				if ($return) {
+					$this->spt_model->update_spt_detail();
+					$result = array('status' => true, 'msg' => 'Data berhasil disimpan');
+					
+					//insert history log
+					$this->common_model->history_log("pendataan", "U", "Update SPT Pajak pln : ".
+							$_POST['spt_id']." | ".$_POST['spt_periode']." | ".$_POST['spt_no_register']." | ".$_POST['wp_wr_nama']." | ".$_POST['spt_pajak']);
+				}
+				else 
+					$result = array('status' => false, 'msg' => 'Data tidak berhasil disimpan');
+			} else {
+				$result = array('status' => false, 'msg' => 'WPWR untuk periode penjualan yang sama sudah pernah diinput');
+			}				
+		} else {
+			$result = array('status' => false, 'msg' => 'Silahkan masukkan data WP terlebih dahulu');
+		}
+		
+		echo json_encode($result);
+	}
+	
+	/**
+	 * deleta data pajak
+	 */
+	function delete() {
+		$result = "";
+		$counter = 0;
+		
+		$arr_id = explode("|", $this->input->post('id'));
+		for ($i = 0; $i < count($arr_id) - 1; $i++) {
+			if($this->spt_model->delete_spt_all($arr_id[$i]) == true) {
+				$counter++;
+				//insert history log
+				$this->common_model->history_log("pendataan", "D", "Delete SPT Pajak pln : ".$arr_id[$i]);
+			}
+		}
+		
+		if ($counter != 0) {
+			echo $counter." data berhasil dihapus";
+		} else {
+			echo "Tidak ada data yang berhasil dihapus";
+		}
+	}
+}

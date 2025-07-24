@@ -1,0 +1,206 @@
+/**
+ * Create main data grid
+ */
+var createDataGrid = function (){
+	$("#tbl_operator").flexigrid({
+		url: GLOBAL_OPERATOR_VARS["get_list"],
+		dataType: 'json',
+		colModel : [
+			{display: 'ID', name : 'opr_id', width : 200, sortable : true, align: 'left', hide:true},
+			{display: 'No.', name : '', width : 10, align: 'center'},
+			{display: '<input type=checkbox name="toggle" value="" onclick="selectRows();" />', name : '', width : 30, align: 'center', process: cellClick},
+			{display: 'Kode', name : 'opr_kode', width : 100, sortable : true, align: 'center', process: cellClick},
+			{display: 'Nama Login', name : 'opr_user', width : 100, sortable : true, align: 'left', process: cellClick},
+			{display: 'Nama Lengkap', name : 'opr_nama', width : 210, sortable : true, align: 'left'},
+			{display: 'NIP', name : 'opr_nip', width : 140, sortable : true, align: 'left', process: cellClick},
+			{display: 'Jabatan', name : 'ref_jab_nama', width : 200, sortable : true, align: 'left', process: cellClick},
+			{display: 'Status', name : 'status_aktif', width : 60, sortable : true, align: 'center', process: cellClick},
+			{display: 'Admin', name : 'status_admin', width : 60, sortable : true, align: 'center', process: cellClick},
+			{display: 'Login', name : 'aktif_login', width : 60, sortable : true, align: 'center', process: cellClick},
+			{display: 'Login Terakhir', name : 'opr_last_login', width : 140, sortable : true, align: 'left', process: cellClick}
+		],
+		searchitems : [
+			{display: 'Kode', name : 'opr_kode', isdefault: true},
+			{display: 'Nama Login', name : 'opr_user'},
+			{display: 'Nama Lengkap', name : 'opr_nama'},
+			{display: 'NIP', name : 'opr_nip'},
+			{display: 'Jabatan', name : 'ref_jab_nama'},
+			{display: 'Status', name : 'status_aktif'},
+			{display: 'Admin', name : 'status_admin'},
+			{display: 'Login', name : 'aktif_login'}
+		],
+		sortname: "opr_kode",
+		sortorder: "asc",
+		usepager: true,
+		title: 'DAFTAR OPERATOR',
+		useRp: true,
+		rp: 10,
+		showTableToggleBtn: true,
+		height: 'auto'
+	});
+};
+
+/**
+ * cellClick Event from grid
+ * @param celDiv
+ * @param id
+ * @returns
+ */
+var cellClick = function(celDiv,id) {
+    $(celDiv).click(function (){
+    	var $row = $(celDiv).parent().parent();
+		var cells = $("div", $row);
+		
+		if ($('#cb'+id+':checked').val() == null) {
+			$('#cb'+id).attr("checked",true);
+			$("input[name=id]").val($(cells[0]).text());
+		}
+		else {
+			$('#cb'+id).attr("checked",false);
+			$("input[name=id]").val('');
+		}	
+    });
+ };
+ 
+ /**
+  * isChecked sptpd
+  * @param id
+  * @returns
+  */
+ var isChecked = function(id, sptId) {
+	 if ($('#cb'+id+':checked').val() == null) {
+		$('#cb'+id).attr("checked",true);
+		$("input[name=id]").val(sptId);
+	 }
+	 else {
+		$('#cb'+id).attr("checked",false);
+		$("input[name=id]").val('');
+	 }
+ };
+ 
+ /**
+  * selectRows function
+  * @returns
+  */
+ var selectRows = function() {
+	var rows = $("table#wp_pribadi_table").find("tr").get();
+	if(rows.length > 0) {
+		$.each(rows,function(i,n) {
+			$(n).toggleClass("trSelected");
+		});
+	};
+	
+	$(".toggle").each( function () {
+		if ($(this).is(':checked')) {
+			$(this).removeAttr('checked');
+		} else {
+			$(this).attr('checked', 'true');
+			$("input[name=id]").val($(this).val());
+		}		
+	});
+};
+
+/**
+ * select row index
+ * @param index
+ * @returns
+ */
+var selectRow = function(index, id) {
+	if ($("#cb"+index).is(':checked')) {
+		$("input[name=id]").val(id);
+	} else {
+		$("input[name=id]").val('');
+	}
+};
+
+/**
+ * editData
+ * @param id
+ * @returns
+ */
+var editData = function(id) {
+	showDialogPost(GLOBAL_OPERATOR_VARS["edit"], "Operator", {opr_id : id}, 700, 450);
+};
+
+
+ /**
+  * Form button
+  */
+ var createEventToolbar = function (){	 	
+ 	$("#btn_add").click(function (){
+ 		showDialog(GLOBAL_OPERATOR_VARS["add"], "Operator", 700, 450);
+ 	});
+ 	
+ 	$("#btn_edit").click(function (){ 		
+ 		if ($("input[name=id]").val().length > 0) {
+ 			editData($("input[name=id]").val());
+		} else {
+			showWarning("Silahkan pilih data terlebih dahulu untuk diedit");
+		}
+ 	});
+ 	
+ 	$("#btn_delete").click(function (){ 		
+ 		if ($("input[name=id]").val().length > 0) {
+ 			showAuthentication('delete');
+		} else {
+			showWarning("Silahkan pilih data terlebih dahulu untuk dihapus");
+		}
+ 	});
+ 	
+ 	$("#btn_jabatan").click(function() {
+ 		showDialog(GLOBAL_OPERATOR_VARS["form_jabatan"], 'Daftar Jabatan', 950, 550);
+ 	});
+ 	
+ 	$("#btn_golongan").click(function() {
+ 		showDialog(GLOBAL_OPERATOR_VARS["form_golongan"], 'Daftar Golongan', 950, 550);
+ 	});
+ };
+ 
+ var deleteData = function() {
+	 var remove = function (){
+		 var selectedItems = "";
+		 
+		 $(".toggle").each( function () {
+			if ($(this).is(':checked')) {
+				selectedItems += $(this).val() + "|";
+			}		
+		});
+		 
+		 $.ajax({
+		     type: "POST",
+		     url: GLOBAL_OPERATOR_VARS["delete"],
+		     data: "mode=delete&id="+selectedItems,
+		     success: function(msg){
+	 			$("#tbl_operator").flexReload();
+	 			showNotification(msg);
+		     }
+		 });
+	 };
+		 
+	 $("#confirmation_delete").dialog({
+		bgiframe: true,
+		resizable: false,
+		height: 350,
+		height: 140,
+		modal: true,
+		overlay: {
+			backgroundColor: '#000',
+			opacity: 0.2
+		},
+		buttons: {
+			'Ya': function() {
+				$(this).dialog('close');
+				remove();
+			},
+			'Tidak': function() {
+				$(this).dialog('close');
+			}
+		}
+	});
+ };
+ 
+$(document).ready(function(){
+	//flexigrid table
+	createDataGrid();
+	createEventToolbar();
+});
