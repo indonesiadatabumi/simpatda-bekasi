@@ -1,4 +1,5 @@
 /api_penerimaan/
+/application/config/database.php
 /ebphtb/
 /files/
 /phpPgAdmin/
