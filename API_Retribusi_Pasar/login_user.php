@@ -10,7 +10,7 @@ require_once "fungsi.php";
 // $content    = utf8_encode($content);
 // $data       = json_decode($content,TRUE);
 if (!$data) {
-    login_log("Invalid JSON Body", 'ERROR');
+    log_error("Invalid JSON Body", 'ERROR');
     http_response_code(400);
     echo json_encode([
         'success' => false,
@@ -23,7 +23,7 @@ $required_fields = ['username', 'password'];
 
 foreach ($required_fields as $field) {
     if (empty($data[$field])) {
-        login_log("Missing field: $field. Request: " . json_encode($data), 'ERROR');
+        log_error("Missing field: $field. Request: " . json_encode($data), 'ERROR');
         http_response_code(400);
         echo json_encode([
             'success' => false,
@@ -41,7 +41,7 @@ $query_cek_user = "SELECT users.id_user, users.username, users.fullname, users.e
 $result_cek_user = pg_query($connect, $query_cek_user);
 
 if (!$result_cek_user) {
-    login_log("Sql cek data user error: " . pg_last_error($connect), 'ERROR');
+    log_error("Sql cek data user error: " . pg_last_error($connect), 'ERROR');
     http_response_code(500);
     echo json_encode([
         'success' => false,
@@ -54,14 +54,12 @@ $row_cek_user = pg_fetch_object($result_cek_user);
 pg_free_result($result_cek_user);
 
 if ($row_cek_user == null) { //apabila belum pernah daftar
-    login_log("Response: Username belum terdaftar. Received: " . json_encode($data), 'ERROR');
     $response = [
         'status' => 'gagal',
         'message' => 'Username belum terdaftar'
     ];
 } else {
     if (password_verify($password, $row_cek_user->password)) {
-        login_log("Response: sukses. Received: " . json_encode($data), 'INFO');
         $response = [
             'status' => 'sukses',
             'id_user' => $row_cek_user->id_user,
@@ -71,7 +69,6 @@ if ($row_cek_user == null) { //apabila belum pernah daftar
             'created_at' => $row_cek_user->created_at,
         ];
     } else {
-        login_log("Response: Password salah. Received: " . json_encode($data), 'ERROR');
         $response = [
             'status' => 'gagal',
             'message' => 'Password salah'

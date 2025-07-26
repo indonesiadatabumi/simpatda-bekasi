@@ -1,29 +1,9 @@
 <?php
 ini_set('max_execution_time', 0); // Timeout jadi unlimited detik
 
-function db_log($pesan, $level = 'INFO')
+function log_error($pesan, $level = 'ERROR')
 {
-    $log_file = 'logs/db.log';
-
-    $timestamp = date('Y-m-d H:i:s');
-    $log_entry = "[$timestamp] [$level] $pesan\n";
-
-    file_put_contents($log_file, $log_entry, FILE_APPEND);
-}
-
-function login_log($pesan, $level = 'INFO')
-{
-    $log_file = 'logs/login.log';
-
-    $timestamp = date('Y-m-d H:i:s');
-    $log_entry = "[$timestamp] [$level] $pesan\n";
-
-    file_put_contents($log_file, $log_entry, FILE_APPEND);
-}
-
-function inquiry_wp_log($pesan, $level = 'INFO')
-{
-    $log_file = 'logs/inquiry-wp.log';
+    $log_file = 'logs/error.log';
 
     $timestamp = date('Y-m-d H:i:s');
     $log_entry = "[$timestamp] [$level] $pesan\n";
@@ -39,7 +19,7 @@ function pasar_log($service, $method, $ip_address, $user_agent, $request_body, $
     $query = pg_query($connect, $sql);
 
     if (!$query) {
-        db_log("Insert log pasar gagal: " . pg_last_error($connect), 'ERROR');
+        log_error("Insert log pasar gagal: " . pg_last_error($connect), 'ERROR');
         http_response_code(500);
         echo json_encode([
             'success' => false,

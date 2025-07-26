@@ -9,7 +9,7 @@ require_once "fungsi.php";
 // $content    = utf8_encode($content);
 // $data       = json_decode($content,TRUE);
 if (!$data) {
-    inquiry_wp_log("Invalid JSON Body", 'ERROR');
+    log_error("Invalid JSON Body", 'ERROR');
     http_response_code(400);
     echo json_encode([
         'success' => false,
@@ -19,7 +19,7 @@ if (!$data) {
 }
 
 if (empty($data['npwrd'])) {
-    inquiry_wp_log("Missing field: npwrd. Request: " . json_encode($data), 'ERROR');
+    log_error("Missing field: npwrd. Request: " . json_encode($data), 'ERROR');
     http_response_code(400);
     echo json_encode([
         'success' => false,
@@ -35,7 +35,7 @@ $query = "SELECT reg.npwrd, reg.nm_wp_wr, reg.alamat_wp_wr, reg.kelurahan, reg.k
 $result = pg_query($connect, $query);
 
 if (!$result) {
-    inquiry_wp_log("Sql cek data wp error: " . pg_last_error($connect), 'ERROR');
+    log_error("Sql cek data wp error: " . pg_last_error($connect), 'ERROR');
     http_response_code(500);
     echo json_encode([
         'success' => false,
@@ -47,7 +47,6 @@ if (!$result) {
 $row = pg_fetch_object($result);
 pg_free_result($result);
 if ($row == null) {
-    inquiry_wp_log("Wp Tidak Ditemukan. Received: " . json_encode($data), 'ERROR');
     $response = [
         'status' => 'Gagal',
         'data' => 'Wp Tidak Ditemukan'
@@ -57,7 +56,7 @@ if ($row == null) {
     $result2 = pg_query($connect, $query2);
 
     if (!$result2) {
-        inquiry_wp_log("Sql cek data total retribusi error: " . pg_last_error($connect), 'ERROR');
+        log_error("Sql cek data total retribusi error: " . pg_last_error($connect), 'ERROR');
         http_response_code(500);
         echo json_encode([
             'success' => false,
@@ -74,7 +73,7 @@ if ($row == null) {
     $result_log = pg_query($connect, $query_log);
 
     if (!$result_log) {
-        inquiry_wp_log("Sql insert app log retribusi pasar error: " . pg_last_error($connect), 'ERROR');
+        log_error("Sql insert app log retribusi pasar error: " . pg_last_error($connect), 'ERROR');
         http_response_code(500);
         echo json_encode([
             'success' => false,
@@ -94,7 +93,6 @@ if ($row == null) {
         'kota' => $row->kota,
         'nominal_pengenaan' => $row2->total_retribusi
     ];
-    inquiry_wp_log("Response: Sukses. Received: " . json_encode($data), 'INFO');
     $response = [
         'status' => 'Sukses',
         'data_wp' => $data,
